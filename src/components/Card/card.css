@@ -1,0 +1,119 @@
+.card {
+  padding: 8px;
+  box-shadow: 0px 4px 12px 0px #00000026;
+
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 60px 1fr 34px;
+  grid-template-rows: auto auto auto 1fr auto;
+  grid-template-areas:
+    'poster     title      score'
+    'poster     date       score'
+    'poster     genres     genres'
+    'overview   overview   overview'
+    'rate       rate       rate';
+}
+
+.card__poster {
+  grid-area: poster;
+
+  width: 100%;
+  height: auto;
+}
+
+.card__title {
+  grid-area: title;
+
+  margin: 0;
+
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 28px;
+}
+
+.card__date {
+  grid-area: date;
+
+  margin: 0;
+
+  color: #827e7e;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 22px;
+}
+
+.card__genres {
+  grid-area: genres;
+
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.card__genre {
+  margin-right: 0;
+}
+
+.card__overview {
+  grid-area: overview;
+
+  margin: 0;
+
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 22px;
+}
+
+.card__score {
+  grid-area: score;
+
+  margin-left: auto;
+  margin-bottom: auto;
+
+  width: 30px;
+  height: 30px;
+
+  text-align: center;
+
+  border-width: 2px;
+  border-style: solid;
+  border-color: transparent;
+  border-radius: 50%;
+
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 30px;
+}
+
+.card__rate {
+  grid-area: rate;
+
+  margin-left: auto;
+}
+
+.card__rate .ant-rate-star {
+  font-size: 16px;
+}
+
+@media (min-width: 1000px) {
+  .card {
+    grid-template-columns: 185px 1fr 34px;
+    grid-template-areas:
+      'poster title    score'
+      'poster date     score'
+      'poster genres   score'
+      'poster overview overview'
+      'poster rate     rate';
+  }
+
+  .card__poster {
+    margin-top: -8px;
+    margin-left: -8px;
+    margin-bottom: -8px;
+  }
+}

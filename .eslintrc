@@ -1,0 +1,38 @@
+{
+  "env": {
+    "browser": true
+  },
+  "extends": ["airbnb", "airbnb/hooks", "plugin:prettier/recommended"],
+  "parser": "@babel/eslint-parser",
+  "parserOptions": {
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "requireConfigFile": false,
+    "babelOptions": {
+      "presets": ["@babel/preset-react"]
+    }
+  },
+  "overrides": [
+    {
+      "files": ["*.js", "*.jsx"]
+    }
+  ],
+  "plugins": ["prettier", "import", "react", "react-hooks", "jsx-a11y"],
+  "rules": {
+    // <MyComponent {...spread} />
+    "react/jsx-props-no-spreading": "off",
+    // Автофокус без манипуляций DOM
+    "jsx-a11y/no-autofocus": "off",
+
+    // Порядок импортов
+    "import/order": [
+      "error",
+      {
+        "groups": ["builtin", "external", "internal", "parent", "sibling", "index"],
+        "newlines-between": "always"
+      }
+    ]
+  }
+}
