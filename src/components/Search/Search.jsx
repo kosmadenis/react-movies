@@ -1,66 +1,98 @@
 import React, { Component } from 'react'
-import { Input, Pagination } from 'antd'
+import { Alert, Input, Spin } from 'antd'
 import PropTypes from 'prop-types'
 
-import Card from '../Card'
+import * as Api from '../../services/MovieDBApi'
+
 import './search.css'
-import { apiBaseUrl } from '../../consts'
+import SearchResults from './SearchResults'
 
 class Search extends Component {
   constructor() {
     super()
 
     this.state = {
+      error: false,
+      loading: false,
+      online: window.navigator.onLine,
+
+      totalResults: 0,
       movies: [],
     }
   }
 
   componentDidMount() {
-    this.fetchSearch('return').catch(console.error)
+    window.addEventListener('online', this.onOnline)
+    window.addEventListener('offline', this.onOffline)
+
+    this.setState({ loading: true, error: false })
+
+    Api.search('return', 1)
+      .then((data) => this.setState({ ...data, loading: false }))
+      .catch(() => this.setState({ totalResults: 0, movies: [], error: true }))
   }
 
-  async fetchSearch(query) {
-    const response = await fetch(`${apiBaseUrl}search/movie?query=${query}`, {
-      headers: {
-        Accept: 'application/json',
-        Authorization: process.env.REACT_APP_TMDB_TOKEN,
-      },
-    })
+  componentWillUnmount() {
+    window.removeEventListener('online', this.onOnline)
+    window.removeEventListener('offline', this.onOffline)
+  }
 
-    if (!response.ok) {
-      throw new Error(`Error fetching API: non-2xx HTTP code (${response.status})`)
-    }
+  onOnline = () => {
+    this.setState({ online: true })
+  }
 
-    const data = await response.json()
-
-    const movies = data.results.map((result) => ({
-      id: result.id,
-      posterPath: result.poster_path,
-      title: result.title,
-      overview: result.overview,
-      releaseDate: result.release_date ? new Date(result.release_date) : null,
-      genres: result.genre_ids,
-      score: result.vote_average,
-    }))
-
-    this.setState((state) => ({ ...state, movies }))
+  onOffline = () => {
+    this.setState({ online: false })
   }
 
   render() {
-    const { movies } = this.state
+    const { online, loading, error, movies, totalResults } = this.state
     const { genreNames } = this.props
 
-    const cards = movies.map((movie) => (
-      <li key={movie.id}>
-        <Card genreNames={genreNames} {...movie} />
-      </li>
-    ))
+    const resutsData = {
+      genreNames,
+      totalResults,
+      movies,
+    }
+
+    const showOffline = !online
+    const showError = online && error
+    const showLoading = online && !error && loading
+    const showResults = online && !error && !loading
+
+    const offlineAlert = showOffline ? (
+      <Alert
+        showIcon
+        message="Currently offline"
+        type="warning"
+        className="search__alert"
+      />
+    ) : null
+
+    const errorAlert = showError ? (
+      <Alert
+        showIcon
+        message="Error searching movies"
+        type="error"
+        className="search__alert"
+      />
+    ) : null
+
+    const loadingSpinner = showLoading ? (
+      <Spin size="large" className="search__spinner" />
+    ) : null
+
+    const results = showResults ? <SearchResults {...resutsData} /> : null
+
+    const input = online ? <Input placeholder="Type to search..." /> : null
 
     return (
       <section className="search">
-        <Input placeholder="Type to search..." />
-        <ul className="search__grid">{cards}</ul>
-        <Pagination className="search__pagination" defaultCurrent={1} total={50} />
+        {input}
+        {offlineAlert}
+        {errorAlert}
+        {loadingSpinner}
+        {results}
       </section>
     )
   }
