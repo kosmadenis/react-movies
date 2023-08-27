@@ -5,7 +5,7 @@ import { Rate, Tag } from 'antd'
 
 import './card.css'
 import { calculateScoreColor, limitText } from '../../util'
-import { imageBaseUrl } from '../../consts'
+import { IMAGE_BASE_URL } from '../../consts'
 
 function Card({
   genreNames,
@@ -37,9 +37,9 @@ function Card({
 
   const imgSizes = posterPath ? '(max-width: 999px) 92px, 185px' : null
   const imgSrcSet = posterPath
-    ? `${imageBaseUrl}w92${posterPath} 92w, ${imageBaseUrl}w185${posterPath} 185w`
+    ? `${IMAGE_BASE_URL}w92${posterPath} 92w, ${IMAGE_BASE_URL}w185${posterPath} 185w`
     : null
-  const imgSrc = posterPath ? `${imageBaseUrl}original${posterPath}` : null
+  const imgSrc = posterPath ? `${IMAGE_BASE_URL}original${posterPath}` : null
 
   return (
     <div className="card">
@@ -57,7 +57,7 @@ function Card({
       <div className="card__score" style={{ borderColor: scoreColorText }}>
         {score.toFixed(1)}
       </div>
-      <Rate fontSize={10} className="card__rate" allowHalf count={10} />
+      <Rate className="card__rate" allowHalf count={10} />
     </div>
   )
 }

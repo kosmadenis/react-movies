@@ -94,9 +94,7 @@
   grid-area: rate;
 
   margin-left: auto;
-}
 
-.card__rate .ant-rate-star {
   font-size: 16px;
 }
 

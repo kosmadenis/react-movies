@@ -1,9 +1,9 @@
-import { apiBaseUrl } from '../consts'
+import { API_BASE_URL } from '../consts'
 
 async function callApi(path, method = 'GET') {
   const normalizedPath = path.startsWith('/') ? path.slice(1) : path
 
-  const url = apiBaseUrl + normalizedPath
+  const url = API_BASE_URL + normalizedPath
 
   const response = await fetch(url, {
     method,

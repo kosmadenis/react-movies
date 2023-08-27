@@ -1,20 +1,54 @@
 import React, { Component } from 'react'
 import { Alert, Input, Spin } from 'antd'
 import PropTypes from 'prop-types'
+import { debounce } from 'lodash-es'
 
 import * as Api from '../../services/MovieDBApi'
+import { DEBOUNCE_DELAY } from '../../consts'
 
 import './search.css'
 import SearchResults from './SearchResults'
 
 class Search extends Component {
+  // eslint-disable-next-line react/sort-comp
+  fetchSearch = () => {
+    const { inputText, page, searchText } = this.state
+
+    const hasText = !!inputText
+
+    const newPage = inputText === searchText ? page : 1
+
+    this.setState({
+      searchText: inputText,
+      page: newPage,
+      loading: hasText,
+      error: false,
+      totalResults: 0,
+      movies: [],
+    })
+
+    if (hasText) {
+      Api.search(inputText, newPage).then(
+        (data) => this.setState({ ...data, loading: false }),
+        () => this.setState({ error: true })
+      )
+    }
+  }
+
+  fetchSearchDebounce = debounce(this.fetchSearch, DEBOUNCE_DELAY)
+
   constructor() {
     super()
 
     this.state = {
+      inputText: '',
+      searchText: '',
+
       error: false,
       loading: false,
       online: window.navigator.onLine,
+
+      page: 1,
 
       totalResults: 0,
       movies: [],
@@ -24,12 +58,26 @@ class Search extends Component {
   componentDidMount() {
     window.addEventListener('online', this.onOnline)
     window.addEventListener('offline', this.onOffline)
+  }
 
-    this.setState({ loading: true, error: false })
+  componentDidUpdate(prevProps, prevState) {
+    const { inputText, page, searchText } = this.state
 
-    Api.search('return', 1)
-      .then((data) => this.setState({ ...data, loading: false }))
-      .catch(() => this.setState({ totalResults: 0, movies: [], error: true }))
+    // Переключение страницы без изменения текста поиска
+    // (вследствие взаимодействия с инпутами пагинации)
+    if (page !== prevState.page && searchText === prevState.searchText) {
+      this.fetchSearchDebounce.cancel()
+      this.fetchSearch()
+    }
+    // Изменение текста ввода
+    // (вследствие взаимодействия с инпутом поиска)
+    else if (inputText !== prevState.inputText) {
+      if (inputText === searchText) {
+        this.fetchSearchDebounce.cancel()
+      } else {
+        this.fetchSearchDebounce()
+      }
+    }
   }
 
   componentWillUnmount() {
@@ -45,11 +93,34 @@ class Search extends Component {
     this.setState({ online: false })
   }
 
+  onInputChange = (event) => {
+    const inputText = event.target.value
+    this.setState({ inputText })
+  }
+
+  onPageChange = (page) => {
+    this.setState({ page })
+  }
+
   render() {
-    const { online, loading, error, movies, totalResults } = this.state
+    const {
+      inputText,
+      searchText,
+      online,
+      loading,
+      error,
+      page,
+      movies,
+      totalResults,
+    } = this.state
+
     const { genreNames } = this.props
 
+    const { onPageChange } = this
+
     const resutsData = {
+      onPageChange,
+      page,
       genreNames,
       totalResults,
       movies,
@@ -58,7 +129,7 @@ class Search extends Component {
     const showOffline = !online
     const showError = online && error
     const showLoading = online && !error && loading
-    const showResults = online && !error && !loading
+    const showResults = online && !error && !loading && !!searchText
 
     const offlineAlert = showOffline ? (
       <Alert
@@ -84,7 +155,13 @@ class Search extends Component {
 
     const results = showResults ? <SearchResults {...resutsData} /> : null
 
-    const input = online ? <Input placeholder="Type to search..." /> : null
+    const input = online ? (
+      <Input
+        placeholder="Type to search..."
+        value={inputText}
+        onChange={this.onInputChange}
+      />
+    ) : null
 
     return (
       <section className="search">

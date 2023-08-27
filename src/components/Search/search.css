@@ -12,6 +12,10 @@
   margin-top: calc(50vh - 75px);
 }
 
+.search__results-alert {
+  margin-top: calc(50vh - 80px);
+}
+
 .search__grid {
   list-style: none;
   margin: 0;
