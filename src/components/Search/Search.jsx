@@ -83,6 +83,8 @@ class Search extends Component {
   componentWillUnmount() {
     window.removeEventListener('online', this.onOnline)
     window.removeEventListener('offline', this.onOffline)
+
+    this.fetchSearchDebounce.cancel()
   }
 
   onOnline = () => {
