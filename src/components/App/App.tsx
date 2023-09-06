@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React from 'react'
 import { ConfigProvider, Tabs } from 'antd'
 
 import Search from '../Search'
@@ -6,9 +6,15 @@ import Rated from '../Rated'
 
 import './app.css'
 
-class App extends Component {
-  constructor() {
-    super()
+interface Props {}
+
+interface State {
+  genreNames: { [index: number]: string }
+}
+
+const App = class extends React.Component<Props, State> {
+  constructor(props: Props) {
+    super(props)
 
     this.state = {
       genreNames: {
@@ -35,7 +41,7 @@ class App extends Component {
     }
   }
 
-  render() {
+  override render() {
     const { genreNames } = this.state
 
     const tabs = [

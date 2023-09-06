@@ -1,10 +1,24 @@
 import React from 'react'
 import { Alert, Pagination } from 'antd'
-import PropTypes from 'prop-types'
 
 import Card from '../Card'
+import type { MovieData } from '../../model/types'
 
-function SearchResults({ genreNames, totalResults, movies, page, onPageChange }) {
+interface Props {
+  genreNames: { [index: number]: string }
+  totalResults: number
+  movies: MovieData[]
+  page: number
+  onPageChange: (page: number) => void
+}
+
+const GridList: React.FC<Props> = ({
+  genreNames,
+  totalResults,
+  movies,
+  page,
+  onPageChange,
+}) => {
   if (movies.length === 0) {
     return (
       <Alert
@@ -37,29 +51,4 @@ function SearchResults({ genreNames, totalResults, movies, page, onPageChange })
   )
 }
 
-SearchResults.defaultProps = {
-  genreNames: {},
-  totalResults: 0,
-  movies: [],
-  page: 1,
-  onPageChange: () => {},
-}
-
-SearchResults.propTypes = {
-  genreNames: PropTypes.objectOf(PropTypes.string),
-  totalResults: PropTypes.number,
-  movies: PropTypes.arrayOf(
-    PropTypes.shape({
-      posterPath: PropTypes.string,
-      title: PropTypes.string.isRequired,
-      overview: PropTypes.string.isRequired,
-      releaseDate: PropTypes.instanceOf(Date),
-      genres: PropTypes.arrayOf(PropTypes.number).isRequired,
-      score: PropTypes.number.isRequired,
-    })
-  ),
-  page: PropTypes.number,
-  onPageChange: PropTypes.func,
-}
-
-export default SearchResults
+export default GridList

@@ -1,5 +1,5 @@
 // Отрезать текст `text` до длины `maxLength`, добавив троеточие.
-export function limitText(text, maxLength) {
+export function limitText(text: string, maxLength: number): string {
   if (text.length <= maxLength) {
     return text
   }
@@ -19,13 +19,13 @@ export function limitText(text, maxLength) {
 }
 
 // Ограничить число значениями `min`, `max`.
-export function clamp(value, min, max) {
+export function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value))
 }
 
 // Вычислить цвет для оценки фильма `score`.
 // `score` - float число от 0 до 10.
-export function calculateScoreColor(score) {
+export function calculateScoreColor(score: number) {
   // Нормализованная оценка
   const x = clamp(score / 10, 0, 1)
 

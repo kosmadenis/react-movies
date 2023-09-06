@@ -1,6 +1,7 @@
 import { API_BASE_URL } from '../consts'
+import type { ApiSearchResult, MovieData } from '../model/types'
 
-async function callApi(path, method = 'GET') {
+async function callApi(path: string, method = 'GET'): Promise<any> {
   const normalizedPath = path.startsWith('/') ? path.slice(1) : path
 
   const url = API_BASE_URL + normalizedPath
@@ -9,7 +10,7 @@ async function callApi(path, method = 'GET') {
     method,
     headers: {
       Accept: 'application/json',
-      Authorization: process.env.REACT_APP_TMDB_TOKEN,
+      Authorization: process.env.REACT_APP_TMDB_TOKEN ?? '',
     },
   })
 
@@ -22,25 +23,65 @@ async function callApi(path, method = 'GET') {
   return data
 }
 
-export async function search(query, page) {
+export async function search(query: string, page: number): Promise<ApiSearchResult> {
   const data = await callApi(`search/movie?query=${query}&page=${page}`)
 
-  const movies = data.results.map((result) => ({
-    id: result.id,
-    posterPath: result.poster_path,
-    title: result.title,
-    overview: result.overview,
-    releaseDate: result.release_date ? new Date(result.release_date) : null,
-    genres: result.genre_ids,
-    score: result.vote_average,
-  }))
+  if (typeof data !== 'object' || data === null) {
+    throw new Error('Api returned invalid data')
+  }
+
+  const { results } = data
+
+  const movies: MovieData[] = []
+  if (Array.isArray(results)) {
+    for (const result of results) {
+      const {
+        id,
+        poster_path, // eslint-disable-line @typescript-eslint/naming-convention
+        title,
+        overview,
+        release_date, // eslint-disable-line @typescript-eslint/naming-convention
+        genre_ids, // eslint-disable-line @typescript-eslint/naming-convention
+        vote_average, // eslint-disable-line @typescript-eslint/naming-convention
+      } = result
+
+      if (typeof id !== 'number') {
+        continue
+      }
+
+      const movie: MovieData = { id }
+
+      if (typeof poster_path === 'string') {
+        movie.posterPath = poster_path
+      }
+
+      if (typeof title === 'string') {
+        movie.title = title
+      }
+
+      if (typeof overview === 'string') {
+        movie.overview = overview
+      }
+
+      if (typeof release_date === 'number') {
+        movie.releaseDate = new Date(release_date)
+      }
+
+      if (
+        Array.isArray(genre_ids) &&
+        genre_ids.every((val) => typeof val === 'number')
+      ) {
+        movie.genres = genre_ids
+      }
+
+      if (typeof vote_average === 'number') {
+        movie.score = vote_average
+      }
+    }
+  }
 
   return {
-    totalResults: data.total_results,
+    totalResults: typeof data.total_results === 'number' ? data.total_results : 0,
     movies,
   }
-}
-
-export async function a() {
-  //
 }

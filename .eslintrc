@@ -42,6 +42,8 @@
     }
   },
   "rules": {
+    "no-continue": "off",
+    "no-restricted-syntax": "off",
     "import/prefer-default-export": "off",
     "no-restricted-exports": "off",
     "jsx-a11y/no-autofocus": "off",

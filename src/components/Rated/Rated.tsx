@@ -1,7 +1,9 @@
-import { Empty } from 'antd'
 import React from 'react'
+import { Empty } from 'antd'
 
-function Rated() {
+interface Props {}
+
+const Rated: React.FC<Props> = () => {
   return <Empty />
 }
 

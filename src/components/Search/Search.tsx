@@ -1,15 +1,30 @@
 import React, { Component } from 'react'
 import { Alert, Input, Spin } from 'antd'
-import PropTypes from 'prop-types'
 import { debounce } from 'lodash-es'
 
 import * as Api from '../../services/MovieDBApi'
 import { DEBOUNCE_DELAY } from '../../consts'
+import type { MovieData } from '../../model/types'
+import GridList from '../GridList'
 
 import './search.css'
-import SearchResults from './SearchResults'
 
-class Search extends Component {
+interface Props {
+  genreNames: { [index: number]: string }
+}
+
+interface State {
+  inputText: string
+  searchText: string
+  error: boolean
+  loading: boolean
+  online: boolean
+  page: number
+  totalResults: number
+  movies: MovieData[]
+}
+
+const Search = class extends Component<Props, State> {
   // eslint-disable-next-line react/sort-comp
   fetchSearch = () => {
     const { inputText, page, searchText } = this.state
@@ -37,8 +52,8 @@ class Search extends Component {
 
   fetchSearchDebounce = debounce(this.fetchSearch, DEBOUNCE_DELAY)
 
-  constructor() {
-    super()
+  constructor(props: Props) {
+    super(props)
 
     this.state = {
       inputText: '',
@@ -55,12 +70,12 @@ class Search extends Component {
     }
   }
 
-  componentDidMount() {
+  override componentDidMount() {
     window.addEventListener('online', this.onOnline)
     window.addEventListener('offline', this.onOffline)
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  override componentDidUpdate(prevProps: Props, prevState: State) {
     const { inputText, page, searchText } = this.state
 
     // Переключение страницы без изменения текста поиска
@@ -80,7 +95,7 @@ class Search extends Component {
     }
   }
 
-  componentWillUnmount() {
+  override componentWillUnmount() {
     window.removeEventListener('online', this.onOnline)
     window.removeEventListener('offline', this.onOffline)
 
@@ -95,16 +110,16 @@ class Search extends Component {
     this.setState({ online: false })
   }
 
-  onInputChange = (event) => {
+  onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const inputText = event.target.value
     this.setState({ inputText })
   }
 
-  onPageChange = (page) => {
+  onPageChange = (page: number) => {
     this.setState({ page })
   }
 
-  render() {
+  override render() {
     const {
       inputText,
       searchText,
@@ -155,7 +170,7 @@ class Search extends Component {
       <Spin size="large" className="search__spinner" />
     ) : null
 
-    const results = showResults ? <SearchResults {...resutsData} /> : null
+    const results = showResults ? <GridList {...resutsData} /> : null
 
     const input = online ? (
       <Input
@@ -175,14 +190,6 @@ class Search extends Component {
       </section>
     )
   }
-}
-
-Search.defaultProps = {
-  genreNames: {},
-}
-
-Search.propTypes = {
-  genreNames: PropTypes.objectOf(PropTypes.string),
 }
 
 export default Search
