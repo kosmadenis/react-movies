@@ -1,32 +1,60 @@
 {
   "env": {
-    "browser": true
+    "browser": true,
+    "es2022": true
   },
-  "extends": ["airbnb", "airbnb/hooks", "plugin:prettier/recommended"],
-  "parser": "@babel/eslint-parser",
+  "extends": [
+    "airbnb",
+    "airbnb-typescript",
+    "airbnb/hooks",
+    "plugin:prettier/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
   "parserOptions": {
+    "tsconfigRootDir": ".",
+    "project": "./tsconfig.json",
+
     "sourceType": "module",
+    "ecmaVersion": "latest",
     "ecmaFeatures": {
       "jsx": true
-    },
-    "requireConfigFile": false,
-    "babelOptions": {
-      "presets": ["@babel/preset-react"]
     }
   },
   "overrides": [
     {
-      "files": ["*.js", "*.jsx"]
+      "files": ["*.ts", "*.tsx"]
     }
   ],
-  "plugins": ["prettier", "import", "react", "react-hooks", "jsx-a11y"],
+  "plugins": [
+    "@typescript-eslint",
+    "prettier",
+    "import",
+    "react",
+    "react-hooks",
+    "jsx-a11y"
+  ],
+  "settings": {
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts", ".tsx"]
+    },
+    "react": {
+      "version": "18.x"
+    }
+  },
   "rules": {
-    // <MyComponent {...spread} />
-    "react/jsx-props-no-spreading": "off",
-    // Автофокус без манипуляций DOM
+    "import/prefer-default-export": "off",
+    "no-restricted-exports": "off",
     "jsx-a11y/no-autofocus": "off",
+    "react/jsx-props-no-spreading": "off",
 
-    // Порядок импортов
+    "react/function-component-definition": [
+      "error",
+      {
+        "namedComponents": "arrow-function",
+        "unnamedComponents": "arrow-function"
+      }
+    ],
+
     "import/order": [
       "error",
       {
