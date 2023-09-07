@@ -42,6 +42,7 @@
     }
   },
   "rules": {
+    "react/require-default-props": "off",
     "no-continue": "off",
     "no-restricted-syntax": "off",
     "import/prefer-default-export": "off",
