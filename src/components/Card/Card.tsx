@@ -3,9 +3,11 @@ import { format } from 'date-fns'
 import { Rate, Tag } from 'antd'
 
 import './card.css'
-import { calculateScoreColor, limitText } from '../../util'
 import { IMAGE_BASE_URL } from '../../consts'
 import type { MovieData } from '../../model/types'
+import EllipsizedText from '../EllipsizedText/EllipsizedText'
+
+import { getScoreColor } from './util'
 
 interface Props extends MovieData {
   genreNames: { [index: number]: string }
@@ -35,22 +37,23 @@ const Card: React.FC<Props> = ({
     ? format(releaseDate, 'MMMM d, yyyy')
     : 'Date N/A'
 
-  const overviewText = overview ? limitText(overview, 200) : 'Overview not available'
+  const titleText = title ?? '<No title>'
 
-  const scoreColor = calculateScoreColor(score ?? 0)
-  const scoreColorText = `rgb(${scoreColor.r} ${scoreColor.g} ${scoreColor.b})`
+  const overviewText = overview ?? 'Overview not available'
+
+  const scoreColor = getScoreColor(score)
 
   const imgSrc = posterPath ? `${IMAGE_BASE_URL}original${posterPath}` : undefined
 
   return (
     <div className="card">
       <img className="card__poster" alt="Movie poster" src={imgSrc} />
-      <h1 className="card__title">{title}</h1>
+      <h1 className="card__title">{titleText}</h1>
       <h2 className="card__date">{formattedDate}</h2>
       <ul className="card__genres">{genreElements}</ul>
-      <p className="card__overview">{overviewText}</p>
-      <div className="card__score" style={{ borderColor: scoreColorText }}>
-        {(score ?? 0).toFixed(1)}
+      <EllipsizedText className="card__overview" text={overviewText} />
+      <div className="card__score" style={{ borderColor: scoreColor }}>
+        {score ? score.toFixed(1) : 'N/A'}
       </div>
       <Rate className="card__rate" allowHalf count={10} />
     </div>

@@ -1,4 +1,8 @@
 .card {
+  height: 245px;
+
+  box-sizing: border-box;
+
   padding: 8px;
   box-shadow: 0px 4px 12px 0px #00000026;
 
@@ -98,9 +102,11 @@
   font-size: 16px;
 }
 
-@media (min-width: 1000px) {
+@media (min-width: 1050px) {
   .card {
-    grid-template-columns: 185px 1fr 34px;
+    height: 276px;
+
+    grid-template-columns: 184px 1fr 34px;
     grid-template-areas:
       'poster title    score'
       'poster date     score'
@@ -110,8 +116,10 @@
   }
 
   .card__poster {
-    margin-top: -8px;
-    margin-left: -8px;
-    margin-bottom: -8px;
+    height: 276px;
+  }
+
+  .card__poster {
+    margin: -8px;
   }
 }
