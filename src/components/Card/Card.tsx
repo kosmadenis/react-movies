@@ -1,20 +1,19 @@
 import React from 'react'
 import { format } from 'date-fns'
-import { Rate, Tag } from 'antd'
+import { Rate } from 'antd'
 
 import './card.css'
 import { IMAGE_BASE_URL } from '../../consts'
 import type { MovieData } from '../../model/types'
 import EllipsizedText from '../EllipsizedText/EllipsizedText'
+import { GenreNamesConsumer } from '../GenreNamesContext'
 
 import { getScoreColor } from './util'
+import Tags from './Tags'
 
-interface Props extends MovieData {
-  genreNames: { [index: number]: string }
-}
+interface Props extends MovieData {}
 
 const Card: React.FC<Props> = ({
-  genreNames,
   posterPath,
   title,
   overview,
@@ -22,17 +21,6 @@ const Card: React.FC<Props> = ({
   genres,
   score,
 }) => {
-  const genreElements = genres
-    ? genres
-        .map((genreId) => ({ id: genreId, text: genreNames[genreId] }))
-        .filter((genreObj) => genreObj.text !== undefined)
-        .map((genreObj) => (
-          <Tag key={genreObj.id} className="card__genre">
-            {genreObj.text}
-          </Tag>
-        ))
-    : []
-
   const formattedDate = releaseDate
     ? format(releaseDate, 'MMMM d, yyyy')
     : 'Date N/A'
@@ -50,7 +38,16 @@ const Card: React.FC<Props> = ({
       <img className="card__poster" alt="Movie poster" src={imgSrc} />
       <h1 className="card__title">{titleText}</h1>
       <h2 className="card__date">{formattedDate}</h2>
-      <ul className="card__genres">{genreElements}</ul>
+      <GenreNamesConsumer>
+        {(genreNames) => (
+          <Tags
+            className="card__genres"
+            tagClassName="card__genre"
+            genres={genres}
+            genreNames={genreNames}
+          />
+        )}
+      </GenreNamesConsumer>
       <EllipsizedText className="card__overview" text={overviewText} />
       <div className="card__score" style={{ borderColor: scoreColor }}>
         {score ? score.toFixed(1) : 'N/A'}

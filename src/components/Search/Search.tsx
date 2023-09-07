@@ -2,14 +2,13 @@ import React, { Component } from 'react'
 import { Alert, Input, Spin } from 'antd'
 import { debounce } from 'lodash-es'
 
-import * as Api from '../../services/MovieDBApi'
-import type { MovieData } from '../../model/types'
+import type { ApiSearchResult, MovieData } from '../../model/types'
 import GridList from '../GridList'
 
 import './search.css'
 
 interface Props {
-  genreNames: { [index: number]: string }
+  apiSearch: (query: string, page: number) => Promise<ApiSearchResult>
 }
 
 interface State {
@@ -44,7 +43,8 @@ const Search = class extends Component<Props, State> {
     })
 
     if (hasText) {
-      Api.search(inputText, newPage).then(
+      const { apiSearch } = this.props
+      apiSearch(inputText, newPage).then(
         (data) => this.setState({ ...data, loading: false }),
         () => this.setState({ error: true })
       )
@@ -132,14 +132,11 @@ const Search = class extends Component<Props, State> {
       totalResults,
     } = this.state
 
-    const { genreNames } = this.props
-
     const { onPageChange } = this
 
     const resutsData = {
       onPageChange,
       page,
-      genreNames,
       totalResults,
       movies,
     }

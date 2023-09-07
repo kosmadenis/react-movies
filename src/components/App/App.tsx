@@ -1,6 +1,10 @@
 import React from 'react'
 import { ConfigProvider, Tabs } from 'antd'
 
+import type { GenreNames } from '../../model/types'
+import MovieDBApi from '../../services/MovieDBApi'
+import { MovieDBApiConsumer, MovieDBApiProvider } from '../MovieDBApiContext'
+import { GenreNamesProvider } from '../GenreNamesContext'
 import Search from '../Search'
 import Rated from '../Rated'
 
@@ -9,36 +13,28 @@ import './app.css'
 interface Props {}
 
 interface State {
-  genreNames: { [index: number]: string }
+  genreNames: GenreNames
 }
 
 const App = class extends React.Component<Props, State> {
+  movieDBApi: MovieDBApi
+
   constructor(props: Props) {
     super(props)
 
+    this.movieDBApi = new MovieDBApi()
+
     this.state = {
-      genreNames: {
-        28: 'Action',
-        12: 'Adventure',
-        16: 'Animation',
-        35: 'Comedy',
-        80: 'Crime',
-        99: 'Documentary',
-        18: 'Drama',
-        10751: 'Family',
-        14: 'Fantasy',
-        36: 'History',
-        27: 'Horror',
-        10402: 'Music',
-        9648: 'Mystery',
-        10749: 'Romance',
-        878: 'Science Fiction',
-        10770: 'TV Movie',
-        53: 'Thriller',
-        10752: 'War',
-        37: 'Western',
-      },
+      genreNames: {},
     }
+  }
+
+  override componentDidMount() {
+    this.movieDBApi
+      .getGenreNames()
+      .then((genreNames) => this.setState({ genreNames }))
+      // Смысла показыввать оошибку пользователю нет - просто не будут показываться жанры
+      .catch(console.error)
   }
 
   override render() {
@@ -48,7 +44,11 @@ const App = class extends React.Component<Props, State> {
       {
         label: 'Search',
         key: '0',
-        children: <Search genreNames={genreNames} />,
+        children: (
+          <MovieDBApiConsumer>
+            {({ search }) => <Search apiSearch={search} />}
+          </MovieDBApiConsumer>
+        ),
       },
       {
         label: 'Rated',
@@ -59,7 +59,11 @@ const App = class extends React.Component<Props, State> {
 
     return (
       <ConfigProvider theme={{ token: { fontFamily: 'Inter' } }}>
-        <Tabs className="container" centered defaultActiveKey="0" items={tabs} />
+        <MovieDBApiProvider value={this.movieDBApi}>
+          <GenreNamesProvider value={genreNames}>
+            <Tabs className="container" centered defaultActiveKey="0" items={tabs} />
+          </GenreNamesProvider>
+        </MovieDBApiProvider>
       </ConfigProvider>
     )
   }

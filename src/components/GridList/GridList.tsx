@@ -7,20 +7,13 @@ import type { MovieData } from '../../model/types'
 import './grid-list.css'
 
 interface Props {
-  genreNames: { [index: number]: string }
   totalResults: number
   movies: MovieData[]
   page: number
   onPageChange: (page: number) => void
 }
 
-const GridList: React.FC<Props> = ({
-  genreNames,
-  totalResults,
-  movies,
-  page,
-  onPageChange,
-}) => {
+const GridList: React.FC<Props> = ({ totalResults, movies, page, onPageChange }) => {
   if (movies.length === 0) {
     return (
       <Alert
@@ -34,7 +27,7 @@ const GridList: React.FC<Props> = ({
 
   const cards = movies.map((movie) => (
     <li key={movie.id}>
-      <Card genreNames={genreNames} {...movie} />
+      <Card {...movie} />
     </li>
   ))
 

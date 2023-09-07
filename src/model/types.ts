@@ -12,3 +12,5 @@ export interface ApiSearchResult {
   totalResults: number
   movies: MovieData[]
 }
+
+export type GenreNames = { [index: number]: string }

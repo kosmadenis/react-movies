@@ -1,5 +1,5 @@
 import { API_BASE_URL, IMAGE_BASE_URL } from '../consts'
-import type { ApiSearchResult, MovieData } from '../model/types'
+import type { ApiSearchResult, GenreNames, MovieData } from '../model/types'
 
 class MovieDBApi {
   #apiBaseUrl: string
@@ -11,11 +11,11 @@ class MovieDBApi {
     this.#imageBaseUrl = imageBaseUrl ?? IMAGE_BASE_URL
   }
 
-  getImageBaseUrl() {
+  getImageBaseUrl = () => {
     return this.#imageBaseUrl
   }
 
-  async callApi(path: string, method = 'GET'): Promise<any> {
+  async #callApi(path: string, method = 'GET'): Promise<any> {
     const url = this.#apiBaseUrl + path
 
     const response = await fetch(url, {
@@ -35,8 +35,8 @@ class MovieDBApi {
     return data
   }
 
-  async search(query: string, page: number): Promise<ApiSearchResult> {
-    const data = await this.callApi(`search/movie?query=${query}&page=${page}`)
+  search = async (query: string, page: number): Promise<ApiSearchResult> => {
+    const data = await this.#callApi(`search/movie?query=${query}&page=${page}`)
 
     if (typeof data !== 'object' || data === null) {
       throw new Error('Api returned invalid data')
@@ -101,6 +101,31 @@ class MovieDBApi {
       totalResults: typeof data.total_results === 'number' ? data.total_results : 0,
       movies,
     }
+  }
+
+  getGenreNames = async (): Promise<GenreNames> => {
+    const data = await this.#callApi('genre/movie/list')
+
+    if (typeof data !== 'object' || data === null) {
+      throw new Error('Api returned invalid data')
+    }
+
+    const genreNames: GenreNames = {}
+
+    if (Array.isArray(data.genres)) {
+      for (const genre of data.genres) {
+        if (
+          typeof genre === 'object' &&
+          genre !== null &&
+          typeof genre.id === 'number' &&
+          typeof genre.name === 'string'
+        ) {
+          genreNames[genre.id] = genre.name
+        }
+      }
+    }
+
+    return genreNames
   }
 }
 
