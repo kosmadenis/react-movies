@@ -4,6 +4,8 @@ import { Alert, Pagination } from 'antd'
 import Card from '../Card'
 import type { MovieData } from '../../model/types'
 
+import './grid-list.css'
+
 interface Props {
   genreNames: { [index: number]: string }
   totalResults: number
@@ -38,9 +40,9 @@ const GridList: React.FC<Props> = ({
 
   return (
     <>
-      <ul className="search__grid">{cards}</ul>
+      <ul className="grid-list">{cards}</ul>
       <Pagination
-        className="search__pagination"
+        className="grid-list__pagination"
         showSizeChanger={false}
         pageSize={20}
         current={page}

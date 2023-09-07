@@ -3,7 +3,6 @@ import { Alert, Input, Spin } from 'antd'
 import { debounce } from 'lodash-es'
 
 import * as Api from '../../services/MovieDBApi'
-import { DEBOUNCE_DELAY } from '../../consts'
 import type { MovieData } from '../../model/types'
 import GridList from '../GridList'
 
@@ -23,6 +22,8 @@ interface State {
   totalResults: number
   movies: MovieData[]
 }
+
+const DEBOUNCE_DELAY = 500
 
 const Search = class extends Component<Props, State> {
   // eslint-disable-next-line react/sort-comp
