@@ -97,8 +97,12 @@ const EllipsizedText = class extends React.Component<Props, State> {
   }
 
   override render() {
-    const { className } = this.props
+    const { text, className } = this.props
     const { ellipsizedText } = this.state
+
+    if (!text) {
+      return null
+    }
 
     return (
       <div

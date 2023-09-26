@@ -1,14 +1,12 @@
 import React, { Component } from 'react'
-import { Alert, Input, Spin } from 'antd'
+import { Input } from 'antd'
 import { debounce } from 'lodash-es'
 
-import type { ApiSearchResult, MovieData } from '../../model/types'
+import type { MovieList, MovieData } from '../../model/types'
 import GridList from '../GridList'
 
-import './search.css'
-
 interface Props {
-  apiSearch: (query: string, page: number) => Promise<ApiSearchResult>
+  apiSearch: (query: string, page: number) => Promise<MovieList>
 }
 
 interface State {
@@ -16,7 +14,6 @@ interface State {
   searchText: string
   error: boolean
   loading: boolean
-  online: boolean
   page: number
   totalResults: number
   movies: MovieData[]
@@ -25,7 +22,51 @@ interface State {
 const DEBOUNCE_DELAY = 500
 
 const Search = class extends Component<Props, State> {
-  // eslint-disable-next-line react/sort-comp
+  constructor(props: Props) {
+    super(props)
+
+    this.state = {
+      inputText: '',
+      searchText: '',
+
+      error: false,
+      loading: false,
+
+      page: 1,
+
+      totalResults: 0,
+      movies: [],
+    }
+  }
+
+  override componentDidUpdate(prevProps: Props, prevState: State) {
+    const { inputText, page, searchText } = this.state
+
+    if (page !== prevState.page && searchText === prevState.searchText) {
+      this.fetchSearchDebounce.cancel()
+      this.fetchSearch()
+    } else if (inputText !== prevState.inputText) {
+      if (inputText === searchText) {
+        this.fetchSearchDebounce.cancel()
+      } else {
+        this.fetchSearchDebounce()
+      }
+    }
+  }
+
+  override componentWillUnmount() {
+    this.fetchSearchDebounce.cancel()
+  }
+
+  onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const inputText = event.target.value
+    this.setState({ inputText })
+  }
+
+  onPageChange = (page: number) => {
+    this.setState({ page })
+  }
+
   fetchSearch = () => {
     const { inputText, page, searchText } = this.state
 
@@ -51,140 +92,29 @@ const Search = class extends Component<Props, State> {
     }
   }
 
+  // eslint-disable-next-line react/sort-comp
   fetchSearchDebounce = debounce(this.fetchSearch, DEBOUNCE_DELAY)
 
-  constructor(props: Props) {
-    super(props)
-
-    this.state = {
-      inputText: '',
-      searchText: '',
-
-      error: false,
-      loading: false,
-      online: window.navigator.onLine,
-
-      page: 1,
-
-      totalResults: 0,
-      movies: [],
-    }
-  }
-
-  override componentDidMount() {
-    window.addEventListener('online', this.onOnline)
-    window.addEventListener('offline', this.onOffline)
-  }
-
-  override componentDidUpdate(prevProps: Props, prevState: State) {
-    const { inputText, page, searchText } = this.state
-
-    // Переключение страницы без изменения текста поиска
-    // (вследствие взаимодействия с инпутами пагинации)
-    if (page !== prevState.page && searchText === prevState.searchText) {
-      this.fetchSearchDebounce.cancel()
-      this.fetchSearch()
-    }
-    // Изменение текста ввода
-    // (вследствие взаимодействия с инпутом поиска)
-    else if (inputText !== prevState.inputText) {
-      if (inputText === searchText) {
-        this.fetchSearchDebounce.cancel()
-      } else {
-        this.fetchSearchDebounce()
-      }
-    }
-  }
-
-  override componentWillUnmount() {
-    window.removeEventListener('online', this.onOnline)
-    window.removeEventListener('offline', this.onOffline)
-
-    this.fetchSearchDebounce.cancel()
-  }
-
-  onOnline = () => {
-    this.setState({ online: true })
-  }
-
-  onOffline = () => {
-    this.setState({ online: false })
-  }
-
-  onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const inputText = event.target.value
-    this.setState({ inputText })
-  }
-
-  onPageChange = (page: number) => {
-    this.setState({ page })
-  }
-
   override render() {
-    const {
-      inputText,
-      searchText,
-      online,
-      loading,
-      error,
-      page,
-      movies,
-      totalResults,
-    } = this.state
-
-    const { onPageChange } = this
-
-    const resutsData = {
-      onPageChange,
-      page,
-      totalResults,
-      movies,
-    }
-
-    const showOffline = !online
-    const showError = online && error
-    const showLoading = online && !error && loading
-    const showResults = online && !error && !loading && !!searchText
-
-    const offlineAlert = showOffline ? (
-      <Alert
-        showIcon
-        message="Currently offline"
-        type="warning"
-        className="search__alert"
-      />
-    ) : null
-
-    const errorAlert = showError ? (
-      <Alert
-        showIcon
-        message="Error searching movies"
-        type="error"
-        className="search__alert"
-      />
-    ) : null
-
-    const loadingSpinner = showLoading ? (
-      <Spin size="large" className="search__spinner" />
-    ) : null
-
-    const results = showResults ? <GridList {...resutsData} /> : null
-
-    const input = online ? (
-      <Input
-        placeholder="Type to search..."
-        value={inputText}
-        onChange={this.onInputChange}
-      />
-    ) : null
+    const { inputText, searchText, loading, error, page, movies, totalResults } =
+      this.state
 
     return (
       <section className="search">
-        {input}
-        {offlineAlert}
-        {errorAlert}
-        {loadingSpinner}
-        {results}
+        <Input
+          placeholder="Type to search..."
+          value={inputText}
+          onChange={this.onInputChange}
+        />
+        <GridList
+          empty={!!searchText && 'No movies were found'}
+          loading={loading}
+          error={error && 'Error searching movies'}
+          totalResults={totalResults}
+          movies={movies}
+          page={page}
+          onPageChange={this.onPageChange}
+        />
       </section>
     )
   }

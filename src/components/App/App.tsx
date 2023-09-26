@@ -1,10 +1,9 @@
 import React from 'react'
-import { ConfigProvider, Tabs } from 'antd'
+import { Alert, ConfigProvider, Tabs } from 'antd'
 
 import type { GenreNames } from '../../model/types'
 import MovieDBApi from '../../services/MovieDBApi'
-import { MovieDBApiConsumer, MovieDBApiProvider } from '../MovieDBApiContext'
-import { GenreNamesProvider } from '../GenreNamesContext'
+import { MovieDBProvider } from '../MovieDBContext'
 import Search from '../Search'
 import Rated from '../Rated'
 
@@ -14,6 +13,9 @@ interface Props {}
 
 interface State {
   genreNames: GenreNames
+  sessionId: string | null
+  online: boolean
+  tab: string
 }
 
 const App = class extends React.Component<Props, State> {
@@ -26,44 +28,97 @@ const App = class extends React.Component<Props, State> {
 
     this.state = {
       genreNames: {},
+      sessionId: null,
+      online: window.navigator.onLine,
+      tab: '0',
     }
   }
 
   override componentDidMount() {
+    window.addEventListener('online', this.onOnline)
+    window.addEventListener('offline', this.onOffline)
+
     this.movieDBApi
       .getGenreNames()
       .then((genreNames) => this.setState({ genreNames }))
-      // Смысла показыввать оошибку пользователю нет - просто не будут показываться жанры
-      .catch(console.error)
+      .catch(() => {})
+
+    this.movieDBApi
+      .createGuestSession()
+      .then((sessionId) => this.setState({ sessionId }))
+      .catch(() => {})
+  }
+
+  override componentWillUnmount() {
+    window.removeEventListener('online', this.onOnline)
+    window.removeEventListener('offline', this.onOffline)
+  }
+
+  onOnline = () => {
+    this.setState({ online: true })
+  }
+
+  onOffline = () => {
+    this.setState({ online: false })
   }
 
   override render() {
-    const { genreNames } = this.state
+    const { genreNames, sessionId, online, tab } = this.state
 
-    const tabs = [
-      {
-        label: 'Search',
-        key: '0',
-        children: (
-          <MovieDBApiConsumer>
-            {({ search }) => <Search apiSearch={search} />}
-          </MovieDBApiConsumer>
-        ),
-      },
-      {
-        label: 'Rated',
-        key: '1',
-        children: <Rated />,
-      },
-    ]
+    let content
+
+    if (!online) {
+      content = (
+        <Alert
+          showIcon
+          message="Currently offline"
+          type="warning"
+          className="offline-alert"
+        />
+      )
+    } else {
+      const tabs = [
+        {
+          label: 'Search',
+          key: '0',
+          children: <Search apiSearch={this.movieDBApi.search} />,
+        },
+        {
+          label: 'Rated',
+          disabled: !sessionId,
+          key: '1',
+          children: (
+            <Rated
+              apiRated={this.movieDBApi.getRated}
+              sessionId={sessionId || ''}
+              active={tab === '1'}
+            />
+          ),
+        },
+      ]
+
+      const movieDBContext = {
+        api: this.movieDBApi,
+        genreNames,
+        sessionId,
+      }
+
+      content = (
+        <MovieDBProvider value={movieDBContext}>
+          <Tabs
+            activeKey={tab}
+            className="container"
+            centered
+            items={tabs}
+            onChange={(newTab) => this.setState({ tab: newTab })}
+          />
+        </MovieDBProvider>
+      )
+    }
 
     return (
       <ConfigProvider theme={{ token: { fontFamily: 'Inter' } }}>
-        <MovieDBApiProvider value={this.movieDBApi}>
-          <GenreNamesProvider value={genreNames}>
-            <Tabs className="container" centered defaultActiveKey="0" items={tabs} />
-          </GenreNamesProvider>
-        </MovieDBApiProvider>
+        {content}
       </ConfigProvider>
     )
   }

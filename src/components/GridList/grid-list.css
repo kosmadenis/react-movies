@@ -1,3 +1,9 @@
+.grid-list__wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .grid-list {
   list-style: none;
   margin: 0;
@@ -19,4 +25,27 @@
     gap: 35px;
     grid-template-columns: 1fr 1fr;
   }
+}
+
+.grid-list__center-container {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.grid-list__spinner {
+  margin-top: calc(50vh - 65px);
+}
+
+.grid-list__alert--error {
+  margin-top: calc(50vh - 75px);
+}
+
+.grid-list__alert--empty {
+  margin-top: calc(50vh - 80px);
+}
+
+.grid-list__pagination {
+  margin-top: auto;
 }

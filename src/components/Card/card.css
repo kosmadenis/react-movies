@@ -1,5 +1,6 @@
 .card {
   height: 245px;
+  width: 385px;
 
   box-sizing: border-box;
 
@@ -23,6 +24,18 @@
 
   width: 100%;
   height: auto;
+}
+
+.card__poster--placeholder {
+  background-color: #adadad;
+  filter: opacity(0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card__poster--placeholder svg {
+  width: 50%;
 }
 
 .card__title {
@@ -105,6 +118,7 @@
 @media (min-width: 1050px) {
   .card {
     height: 276px;
+    width: 450px;
 
     grid-template-columns: 184px 1fr 34px;
     grid-template-areas:

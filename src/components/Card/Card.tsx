@@ -1,60 +1,108 @@
-import React from 'react'
+import React, { PureComponent } from 'react'
 import { format } from 'date-fns'
 import { Rate } from 'antd'
 
 import './card.css'
 import { IMAGE_BASE_URL } from '../../consts'
-import type { MovieData } from '../../model/types'
+import type { GenreNames, MovieData } from '../../model/types'
 import EllipsizedText from '../EllipsizedText/EllipsizedText'
-import { GenreNamesConsumer } from '../GenreNamesContext'
+import { ReactComponent as IconImage } from '../../images/icon-image.svg'
+import type MovieDBApi from '../../services/MovieDBApi'
 
-import { getScoreColor } from './util'
 import Tags from './Tags'
 
-interface Props extends MovieData {}
+function getScoreColor(score?: number): string {
+  if (!score) {
+    return '#00000033'
+  }
 
-const Card: React.FC<Props> = ({
-  posterPath,
-  title,
-  overview,
-  releaseDate,
-  genres,
-  score,
-}) => {
-  const formattedDate = releaseDate
-    ? format(releaseDate, 'MMMM d, yyyy')
-    : 'Date N/A'
+  if (score <= 3) {
+    return '#E90000'
+  }
 
-  const titleText = title ?? '<No title>'
+  if (score <= 5) {
+    return '#E97E00'
+  }
 
-  const overviewText = overview ?? 'Overview not available'
+  if (score <= 7) {
+    return '#E9D100'
+  }
 
-  const scoreColor = getScoreColor(score)
+  return '#66E900'
+}
 
-  const imgSrc = posterPath ? `${IMAGE_BASE_URL}original${posterPath}` : undefined
+interface Props extends MovieData {
+  genreNames: GenreNames
+  sessionId: string | null
+  api: MovieDBApi
+}
 
-  return (
-    <div className="card">
-      <img className="card__poster" alt="Movie poster" src={imgSrc} />
-      <h1 className="card__title">{titleText}</h1>
-      <h2 className="card__date">{formattedDate}</h2>
-      <GenreNamesConsumer>
-        {(genreNames) => (
-          <Tags
-            className="card__genres"
-            tagClassName="card__genre"
-            genres={genres}
-            genreNames={genreNames}
-          />
-        )}
-      </GenreNamesConsumer>
-      <EllipsizedText className="card__overview" text={overviewText} />
-      <div className="card__score" style={{ borderColor: scoreColor }}>
-        {score ? score.toFixed(1) : 'N/A'}
+const Card = class extends PureComponent<Props> {
+  override render() {
+    const {
+      id: number,
+      posterPath,
+      title,
+      overview,
+      releaseDate,
+      genres,
+      score,
+      rating,
+
+      genreNames,
+      sessionId,
+      api,
+    } = this.props
+
+    const formattedDate = releaseDate
+      ? format(releaseDate, 'MMMM d, yyyy')
+      : 'Date N/A'
+
+    const titleText = title ?? '<No title>'
+
+    const overviewText = overview ?? 'Overview not available'
+
+    const scoreColor = getScoreColor(score)
+
+    const img = posterPath ? (
+      <img
+        className="card__poster"
+        alt="Movie poster"
+        src={`${IMAGE_BASE_URL}original${posterPath}`}
+      />
+    ) : (
+      <div className="card__poster card__poster--placeholder">
+        <IconImage />
       </div>
-      <Rate className="card__rate" allowHalf count={10} />
-    </div>
-  )
+    )
+
+    return (
+      <div className="card">
+        {img}
+        <h1 className="card__title">{titleText}</h1>
+        <h2 className="card__date">{formattedDate}</h2>
+        <Tags
+          className="card__genres"
+          tagClassName="card__genre"
+          genres={genres}
+          genreNames={genreNames}
+        />
+        <EllipsizedText className="card__overview" text={overviewText} />
+        <div className="card__score" style={{ borderColor: scoreColor }}>
+          {score ? score.toFixed(1) : 'N/A'}
+        </div>
+        <Rate
+          className="card__rate"
+          value={rating}
+          disabled={!sessionId}
+          allowClear={false}
+          allowHalf
+          count={10}
+          onChange={(val) => sessionId && api.addRating(sessionId, number, val)}
+        />
+      </div>
+    )
+  }
 }
 
 export default Card

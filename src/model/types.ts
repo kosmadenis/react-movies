@@ -6,9 +6,10 @@ export interface MovieData {
   releaseDate?: Date
   genres?: number[]
   score?: number
+  rating?: number
 }
 
-export interface ApiSearchResult {
+export interface MovieList {
   totalResults: number
   movies: MovieData[]
 }
